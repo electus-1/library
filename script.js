@@ -1,14 +1,53 @@
 import { getApiKey } from "./env.js";
 
-const myLibrary = [];
 const images = [];
+main();
 
-function Book(title, author, pages, language, haveRead) {
+// [ ] TODO: Handle the main application logic. Load the stored books when the page is loaded. If there is no storage make one.
+function main() {
+  // [x] TODO load books inside the local storage
+  let idCounter = localStorage.getItem("idCounter") || initializeIdCounter();
+  loadBooks();
+
+  // [ ] TODO: handle click on add new books
+
+  let modal = document.querySelector(".modal");
+
+  document.querySelector(".add-book").addEventListener("click", (e) => {
+    modal.style.display = "flex";
+  });
+
+  // [x] TODO: handle closing modal
+  let closeButton = document.querySelector(".close");
+  closeButton.addEventListener("click", (e) => {
+    modal.style.display = "none";
+  });
+
+  window.onclick = function (event) {
+    if (event.target == modal) {
+      modal.style.display = "none";
+    }
+  };
+
+  // [ ] TODO sanitize user input and add new book if user input is fine
+
+  // [ ] TODO: handle click on toggle read/unread
+
+  // [ ] TODO: handle click on remove
+}
+
+function initializeIdCounter() {
+  localStorage.setItem("idCounter", 0);
+  return 0;
+}
+
+function Book(title, author, pages, language, haveRead, id) {
   this.title = title;
   this.author = author;
   this.pages = pages;
   this.language = language;
   this.haveRead = haveRead;
+  this.id = id;
 }
 
 Book.prototype.info = function () {
@@ -16,10 +55,6 @@ Book.prototype.info = function () {
     this.haveRead ? "have read" : "not read yet"
   }.`;
 };
-
-function addBookToLibrary(book) {
-  myLibrary.push(book);
-}
 
 function getLanguageCode(languageName) {
   return Intl.getCanonicalLocales(languageName).toString().toLowerCase();
@@ -99,4 +134,25 @@ function capitalizeEachWord(name) {
   name = name.map((word) => `${word[0].toUpperCase()}${word.substring(1)}`);
   name = name.join(" ");
   return name;
+}
+
+//[x] TODO "Make add new book" button functioning
+function addNewBook(title, author, pages, language, haveRead, id) {
+  const book = new Book(title, author, pages, language, haveRead, id);
+  storeBook(book);
+}
+
+// [x] TODO store books inside the local storage
+function storeBook(book) {
+  localStorage.setItem(book.id, book);
+}
+
+function loadBooks() {
+  let book;
+  Object.keys(localStorage).forEach((key) => {
+    if (key !== "idCounter") {
+      book = localStorage.getItem(key);
+      displayBook(book);
+    }
+  });
 }
