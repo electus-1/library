@@ -100,5 +100,3 @@ function capitalizeEachWord(name) {
   name = name.join(" ");
   return name;
 }
-const book = new Book("brave new world", "Huxley", 300, "English", false);
-getBookCover(book);
