@@ -1,6 +1,7 @@
 import { getApiKey } from "./env.js";
 
 const myLibrary = [];
+const images = [];
 
 function Book(title, author, pages, language, haveRead) {
   this.title = title;
@@ -24,11 +25,13 @@ function getLanguageCode(languageName) {
   return Intl.getCanonicalLocales(languageName).toString().toLowerCase();
 }
 
-function getBookCover(title, author, languageName) {
+function getBookCover(book) {
   // Replace the API key with your own key
   const apiKey = getApiKey();
-  const url = `https://www.googleapis.com/books/v1/volumes?q=${title}+inauthor:${author}&langRestrict=${getLanguageCode(
-    languageName
+  const url = `https://www.googleapis.com/books/v1/volumes?q=${
+    book.title
+  }+inauthor:${book.author}&langRestrict=${getLanguageCode(
+    book.language
   )}&key=${apiKey}`;
 
   fetch(url)
@@ -47,10 +50,55 @@ function getBookCover(title, author, languageName) {
       img.width = 300;
       img.height = 300;
       img.src = imageUrl || defaultImageUrl;
-      document.body.appendChild(img);
+      images.push(img);
     })
     .catch((error) => {
       console.error(error);
     });
 }
-getBookCover("Brave New World", "Huxley", "English");
+
+function displayBook(book) {
+  const card = document.createElement("div");
+  card.classList.add("card");
+
+  const title = document.createElement("p");
+  title.classList.add("title");
+  title.textContent = capitalizeEachWord(book.title);
+  card.appendChild(title);
+
+  const author = document.createElement("p");
+  author.classList.add("author");
+  author.textContent = `by ${capitalizeEachWord(book.author)}`;
+  card.appendChild(author);
+
+  getBookCover(book);
+  const bookCover = images.pop();
+  bookCover.classList.add("book-cover");
+  card.appendChild(bookCover);
+
+  const pages = document.createElement("p");
+  pages.classList.add("pages");
+  pages.textContent = `${book.pages}`;
+  card.appendChild(pages);
+
+  const toggleRead = document.createElement("button");
+  toggleRead.classList.add(book.haveRead ? "read" : "unread");
+  toggleRead.textContent = book.haveRead ? "Have Read" : "Not Read Yet";
+  card.appendChild(toggleRead);
+
+  const removeButton = document.createElement("button");
+  removeButton.classList.add("remove");
+  removeButton.textContent = "Remove Book";
+  card.appendChild(removeButton);
+
+  document.querySelector(".cards").appendChild(card);
+}
+
+function capitalizeEachWord(name) {
+  name = name.split(" ");
+  name = name.map((word) => `${word[0].toUpperCase()}${word.substring(1)}`);
+  name = name.join(" ");
+  return name;
+}
+const book = new Book("brave new world", "Huxley", 300, "English", false);
+getBookCover(book);

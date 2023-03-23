@@ -1,0 +1,45 @@
+body {
+  margin: 0;
+  padding: 0;
+}
+button {
+  border-radius: 32px;
+  outline: none;
+  border: none;
+  text-align: center;
+  font-size: 20px;
+  color: #eeeeee;
+}
+
+.add-book {
+  width: 250px;
+  height: 50px;
+  background-color: #7149c6;
+}
+
+.read,
+.unread,
+.remove {
+  width: 300px;
+  height: 50px;
+}
+
+.read {
+  background-color: #658864;
+}
+
+.unread {
+  background-color: #f55050;
+}
+
+.remove {
+  background-color: black;
+}
+
+.card {
+  height: 500px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  align-items: center;
+}
