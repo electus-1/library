@@ -1,4 +1,4 @@
-require("dotenv").config();
+import { getApiKey } from "./env.js";
 
 const myLibrary = [];
 
@@ -26,8 +26,7 @@ function getLanguageCode(languageName) {
 
 function getBookCover(title, author, languageName) {
   // Replace the API key with your own key
-  const apiKey = process.env.GOOGLE_API_KEY;
-  console.log(apiKey);
+  const apiKey = getApiKey();
   const url = `https://www.googleapis.com/books/v1/volumes?q=${title}+inauthor:${author}&langRestrict=${getLanguageCode(
     languageName
   )}&key=${apiKey}`;
@@ -42,9 +41,11 @@ function getBookCover(title, author, languageName) {
         ? book.volumeInfo.imageLinks.thumbnail
         : null;
       // Set the URL of the default image
-      const defaultImageUrl = "https://example.com/default-book-cover.jpg";
+      const defaultImageUrl = "img/default-cover.jpg";
       // Display the image in an HTML <img> element
       const img = document.createElement("img");
+      img.width = 300;
+      img.height = 300;
       img.src = imageUrl || defaultImageUrl;
       document.body.appendChild(img);
     })
@@ -52,3 +53,4 @@ function getBookCover(title, author, languageName) {
       console.error(error);
     });
 }
+getBookCover("Brave New World", "Huxley", "English");
