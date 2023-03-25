@@ -10,7 +10,7 @@ function main() {
   loadBooks();
 
   // [ ] TODO: handle click on add new books
-
+  // [ ] TODO: focus on first input
   let modal = document.querySelector(".modal");
 
   document.querySelector(".add-book").addEventListener("click", (e) => {
@@ -113,7 +113,7 @@ function displayBook(book) {
 
   const pages = document.createElement("p");
   pages.classList.add("pages");
-  pages.textContent = `${book.pages}`;
+  pages.textContent = `${book.pages}` || "Unknown";
   card.appendChild(pages);
 
   const toggleRead = document.createElement("button");

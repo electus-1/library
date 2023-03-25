@@ -1,2 +1,5 @@
 .env
 env.js
+node_modules
+package.json
+packa-lock.json
