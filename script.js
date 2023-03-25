@@ -1,9 +1,11 @@
 import { getApiKey } from "./env.js";
 
+const modalConfirm = document.querySelector(".modal-confirm");
 let idCounter;
+let allowRemove = false;
 main();
 
-// [ ] TODO: Handle the main application logic. Load the stored books when the page is loaded. If there is no storage make one.
+// [x] TODO: Handle the main application logic. Load the stored books when the page is loaded. If there is no storage make one.
 function main() {
   // [x] TODO load books inside the local storage and display them
   idCounter =
@@ -63,9 +65,17 @@ function main() {
     closeButton.click();
   });
 
-  // [ ] TODO: handle click on toggle read/unread
-
-  // [ ] TODO: handle click on remove
+  // [x] TODO handle click on don't remove or remove buttons on confirmation page
+  const confirmRemove = document.querySelector(".confirm");
+  confirmRemove.addEventListener("click", (e) => {
+    allowRemove = true;
+    modalConfirm.style.display = "none";
+    document.querySelector(".willRemoved").click();
+  });
+  const notConfirmRemove = document.querySelector(".not-confirm");
+  notConfirmRemove.addEventListener("click", (e) => {
+    modalConfirm.style.display = "none";
+  });
 }
 
 function initializeIdCounter() {
@@ -118,15 +128,35 @@ function displayBook(book) {
     pages.textContent = `${book.pages || "Unknown number of"} pages`;
     card.appendChild(pages);
 
+    // [x] TODO: handle click on toggle read/unread and save the changes to local storage
     const toggleRead = document.createElement("button");
     toggleRead.classList.add(book.haveRead ? "read" : "unread");
     toggleRead.textContent = book.haveRead ? "Have Read" : "Not Read Yet";
     card.appendChild(toggleRead);
+    toggleRead.addEventListener("click", (e) => {
+      toggleRead.classList.contains("read")
+        ? markAsUnread(toggleRead, book)
+        : markAsRead(toggleRead, book);
+    });
 
+    // [x] TODO: handle click on remove
     const removeButton = document.createElement("button");
     removeButton.classList.add("remove");
     removeButton.textContent = "Remove Book";
     card.appendChild(removeButton);
+    removeButton.addEventListener("click", (e) => {
+      removeButton.classList.add("willRemoved");
+      if (allowRemove) {
+        // remove from local storage
+        localStorage.removeItem(book.id);
+        // remove from display
+        document.querySelector(".cards").removeChild(card);
+        // disallow removing until next confirmation
+        allowRemove = false;
+      } else {
+        modalConfirm.style.display = "flex";
+      }
+    });
 
     document.querySelector(".cards").appendChild(card);
   }
@@ -168,4 +198,20 @@ function assignID() {
   idCounter++;
   localStorage.setItem("idCounter", JSON.stringify(idCounter));
   return id;
+}
+
+function markAsRead(button, book) {
+  button.classList.remove("unread");
+  button.classList.add("read");
+  button.textContent = "Have Read";
+  book.haveRead = true;
+  localStorage.setItem(book.id, JSON.stringify(book));
+}
+
+function markAsUnread(button, book) {
+  button.classList.remove("read");
+  button.classList.add("unread");
+  button.textContent = "Not Read Yet";
+  book.haveRead = false;
+  localStorage.setItem(book.id, JSON.stringify(book));
 }

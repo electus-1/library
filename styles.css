@@ -1,11 +1,18 @@
+@import url(https://fonts.bunny.net/css?family=amaranth:400);
+
 body {
   margin: 0;
   padding: 0;
+  font-family: "Amaranth", sans-serif, "Helvetica";
+  font-size: 18px;
 }
-
+p {
+  margin: 0;
+  padding: 0;
+}
 .header {
   width: 100%;
-  background-color: #408e91;
+  background-color: #86a3b8;
   color: #eeeeee;
   display: flex;
   justify-content: space-around;
@@ -33,6 +40,7 @@ button {
   text-align: center;
   font-size: 20px;
   color: #eeeeee;
+  font-family: inherit;
 }
 
 button:hover {
@@ -69,6 +77,39 @@ button:active {
   align-items: center;
 }
 
+.confirm-menu {
+  background-color: #408e91;
+  border: 1px solid black;
+  z-index: 11;
+  font-size: 24px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  grid-template-areas: "question question" "confirm notConfirm";
+  row-gap: 20px;
+  column-gap: 50px;
+  padding: 20px;
+}
+
+.confirm-menu > p {
+  grid-area: question;
+}
+
+.confirm-menu > .confirm,
+.confirm-menu > .not-confirm {
+  background-color: black;
+  color: #eeeeee;
+  padding: 5px;
+}
+
+.confirm-menu > .confirm {
+  grid-area: confirm;
+}
+
+.confirm-menu > .not-confirm {
+  grid-area: notConfirm;
+}
+
 .add-book {
   width: 250px;
   height: 50px;
@@ -98,13 +139,14 @@ button:active {
   height: fit-content;
   display: flex;
   flex-direction: column;
-  justify-content: space-around;
+  justify-content: center;
   align-items: center;
   border: 1px solid black;
   border-radius: 12px;
   width: fit-content;
-  gap: 20px;
+  gap: 10px;
   padding: 20px;
+  background-color: #86a3b8;
 }
 
 .card button {
@@ -120,7 +162,8 @@ button:active {
   justify-content: center;
 }
 
-.modal {
+.modal,
+.modal-confirm {
   display: none;
   justify-content: center;
   align-items: center;
@@ -181,6 +224,7 @@ form input[type="number"] {
   border-radius: 12px;
   outline: none;
   border: none;
+  font-family: inherit;
 }
 
 .form input[type="text"]:focus,
