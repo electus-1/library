@@ -1,3 +1,5 @@
+// [ ] TODO: will add dynamically loading cover images from google books api later.
+
 import { getApiKey } from "./env.js";
 
 const modalConfirm = document.querySelector(".modal-confirm");
