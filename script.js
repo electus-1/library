@@ -1,24 +1,27 @@
 import { getApiKey } from "./env.js";
 
-const images = [];
+let idCounter;
 main();
 
 // [ ] TODO: Handle the main application logic. Load the stored books when the page is loaded. If there is no storage make one.
 function main() {
-  // [x] TODO load books inside the local storage
-  let idCounter = localStorage.getItem("idCounter") || initializeIdCounter();
+  // [x] TODO load books inside the local storage and display them
+  idCounter =
+    Number(JSON.parse(localStorage.getItem("idCounter"))) ||
+    initializeIdCounter();
   loadBooks();
 
-  // [ ] TODO: handle click on add new books
-  // [ ] TODO: focus on first input
+  // [x] TODO: handle click on add new books
+  // [x] TODO: focus on first input
   let modal = document.querySelector(".modal");
 
   document.querySelector(".add-book").addEventListener("click", (e) => {
     modal.style.display = "flex";
+    document.querySelector(".modal>.form input:first-of-type").focus();
   });
 
   // [x] TODO: handle closing modal
-  let closeButton = document.querySelector(".close");
+  const closeButton = document.querySelector(".close");
   closeButton.addEventListener("click", (e) => {
     modal.style.display = "none";
   });
@@ -29,7 +32,36 @@ function main() {
     }
   };
 
-  // [ ] TODO sanitize user input and add new book if user input is fine
+  // [x] TODO sanitize user input and if user input is fine add new book and store it
+  const form = document.querySelector(".form");
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
+    // select input elements
+    const title = document.getElementById("title");
+    const author = document.getElementById("author");
+    const pages = document.getElementById("pages");
+    const language = document.getElementById("language");
+    const haveRead = document.querySelector('input[name="haveRead"]:checked');
+
+    // add, store and display new book
+    addNewBook(
+      title.value,
+      author.value,
+      pages.value,
+      language.value,
+      haveRead.value === "yes" ? true : false,
+      assignID()
+    );
+    // clear form
+    title.value = author.value = pages.value = language.value = "";
+
+    document.querySelector(
+      'input[name="haveRead"]:first-of-type'
+    ).checked = true;
+
+    // close modal page
+    closeButton.click();
+  });
 
   // [ ] TODO: handle click on toggle read/unread
 
@@ -37,7 +69,7 @@ function main() {
 }
 
 function initializeIdCounter() {
-  localStorage.setItem("idCounter", 0);
+  localStorage.setItem("idCounter", JSON.stringify(0));
   return 0;
 }
 
@@ -50,83 +82,54 @@ function Book(title, author, pages, language, haveRead, id) {
   this.id = id;
 }
 
-Book.prototype.info = function () {
-  return `${this.title} by ${this.author}, ${this.pages} pages, ${
-    this.haveRead ? "have read" : "not read yet"
-  }.`;
-};
-
 function getLanguageCode(languageName) {
   return Intl.getCanonicalLocales(languageName).toString().toLowerCase();
 }
 
 function getBookCover(book) {
-  // Replace the API key with your own key
-  const apiKey = getApiKey();
-  const url = `https://www.googleapis.com/books/v1/volumes?q=${
-    book.title
-  }+inauthor:${book.author}&langRestrict=${getLanguageCode(
-    book.language
-  )}&key=${apiKey}`;
-
-  fetch(url)
-    .then((response) => response.json())
-    .then((data) => {
-      // Get the first book from the search results
-      const book = data.items[0];
-      // Get the thumbnail image URL
-      const imageUrl = book.volumeInfo.imageLinks
-        ? book.volumeInfo.imageLinks.thumbnail
-        : null;
-      // Set the URL of the default image
-      const defaultImageUrl = "img/default-cover.jpg";
-      // Display the image in an HTML <img> element
-      const img = document.createElement("img");
-      img.width = 300;
-      img.height = 300;
-      img.src = imageUrl || defaultImageUrl;
-      images.push(img);
-    })
-    .catch((error) => {
-      console.error(error);
-    });
+  const img = document.createElement("img");
+  img.width = 300;
+  img.height = 300;
+  img.src = "./img/default-cover.jpg";
+  return img;
 }
 
 function displayBook(book) {
-  const card = document.createElement("div");
-  card.classList.add("card");
+  if (JSON.parse(localStorage.getItem(book.id)) !== null) {
+    const card = document.createElement("div");
+    card.classList.add("card");
 
-  const title = document.createElement("p");
-  title.classList.add("title");
-  title.textContent = capitalizeEachWord(book.title);
-  card.appendChild(title);
+    const title = document.createElement("p");
+    title.classList.add("title");
+    title.textContent = capitalizeEachWord(String(book.title));
+    card.appendChild(title);
 
-  const author = document.createElement("p");
-  author.classList.add("author");
-  author.textContent = `by ${capitalizeEachWord(book.author)}`;
-  card.appendChild(author);
+    const author = document.createElement("p");
+    author.classList.add("author");
+    author.textContent = `by ${capitalizeEachWord(String(book.author))}`;
+    card.appendChild(author);
 
-  getBookCover(book);
-  const bookCover = images.pop();
-  bookCover.classList.add("book-cover");
-  card.appendChild(bookCover);
+    const bookCover = getBookCover(book);
+    bookCover.classList.add("book-cover");
+    card.appendChild(bookCover);
 
-  const pages = document.createElement("p");
-  pages.classList.add("pages");
-  pages.textContent = `${book.pages}` || "Unknown";
-  card.appendChild(pages);
+    const pages = document.createElement("p");
+    pages.classList.add("pages");
+    pages.textContent = `${book.pages || "Unknown number of"} pages`;
+    card.appendChild(pages);
 
-  const toggleRead = document.createElement("button");
-  toggleRead.classList.add(book.haveRead ? "read" : "unread");
-  toggleRead.textContent = book.haveRead ? "Have Read" : "Not Read Yet";
-  card.appendChild(toggleRead);
+    const toggleRead = document.createElement("button");
+    toggleRead.classList.add(book.haveRead ? "read" : "unread");
+    toggleRead.textContent = book.haveRead ? "Have Read" : "Not Read Yet";
+    card.appendChild(toggleRead);
 
-  const removeButton = document.createElement("button");
-  removeButton.classList.add("remove");
-  removeButton.textContent = "Remove Book";
-  card.appendChild(removeButton);
+    const removeButton = document.createElement("button");
+    removeButton.classList.add("remove");
+    removeButton.textContent = "Remove Book";
+    card.appendChild(removeButton);
 
-  document.querySelector(".cards").appendChild(card);
+    document.querySelector(".cards").appendChild(card);
+  }
 }
 
 function capitalizeEachWord(name) {
@@ -140,19 +143,29 @@ function capitalizeEachWord(name) {
 function addNewBook(title, author, pages, language, haveRead, id) {
   const book = new Book(title, author, pages, language, haveRead, id);
   storeBook(book);
+  displayBook(book);
 }
 
 // [x] TODO store books inside the local storage
 function storeBook(book) {
-  localStorage.setItem(book.id, book);
+  localStorage.setItem(book.id, JSON.stringify(book));
 }
 
 function loadBooks() {
   let book;
-  Object.keys(localStorage).forEach((key) => {
-    if (key !== "idCounter") {
-      book = localStorage.getItem(key);
-      displayBook(book);
-    }
-  });
+  if (localStorage.length !== 0) {
+    Object.keys(localStorage).forEach((key) => {
+      if (key !== "idCounter") {
+        book = JSON.parse(localStorage.getItem(key));
+        displayBook(book);
+      }
+    });
+  }
+}
+
+function assignID() {
+  let id = idCounter;
+  idCounter++;
+  localStorage.setItem("idCounter", JSON.stringify(idCounter));
+  return id;
 }
